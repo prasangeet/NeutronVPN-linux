@@ -1,23 +1,59 @@
 {
-  "name": "frontend",
+  "name": "neutronvpn-electron",
   "version": "1.0.0",
-  "description": "",
+  "description": "NeutronVPN - Fast and Secure VPN Service",
   "main": "main.js",
+  "homepage": "https://prasangeetdongre.vercel.app",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"npm:start-electron\" \"npm:start-next\" ",
+    "dev": "concurrently \"npm run start-next\" \"npm run start-electron\"",
     "start-electron": "wait-on http://localhost:3000 && electron .",
-    "start-next": "cd ./neutron-vpn && npm run start"
+    "start-next": "cd ../neutron-vpn && npm run dev",
+    "build": "cd ../neutron-vpn && npm run build && cd ../electron && electron-builder"
   },
-  "keywords": [],
-  "author": "",
+  "build": {
+    "appId": "com.neutronvpn.app",
+    "productName": "NeutronVPN",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "assets/**/*",
+      "frontend/**/*"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "rpm"
+      ],
+      "category": "Network",
+      "maintainer": "NeutronVPN Team",
+      "vendor": "NeutronVPN",
+      "synopsis": "A simple VPN client built with Electron",
+      "description": "NeutronVPN is a lightweight desktop client to connect securely to VPN servers.",
+      "icon": "assets/icon.png"
+    }
+  },
+  "keywords": [
+    "VPN",
+    "Electron",
+    "Next.js",
+    "NeutronVPN",
+    "Network"
+  ],
+  "author": {
+    "name": "Prasangeet Dongre",
+    "email": "prasangeetdongre1@gmail.com"
+  },
   "license": "ISC",
   "dependencies": {
     "axios": "^1.12.2",
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "wait-on": "^9.0.1"
   },
   "devDependencies": {
     "electron": "^38.3.0",
-    "wait-on": "^9.0.1"
+    "electron-builder": "^26.0.12"
   }
 }

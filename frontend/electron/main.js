@@ -20,12 +20,24 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadURL("http://localhost:3000");
+  // Load hosted frontend
+  mainWindow.loadURL("https://your-hosted-next-app.com");
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+});
+
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
+});
+
+app.on("activate", () => {
+  if (!mainWindow) createWindow();
 });
 
 // -------------------- VPN IPC --------------------
@@ -36,12 +48,10 @@ ipcMain.handle("vpn-connect", async (event, filename) => {
     const configPath = path.join(configDir, filename);
     await fs.promises.chmod(configPath, 0o600);
 
-    // Bring interface down first (ignore errors)
     await new Promise((resolve) => {
       exec(`sudo wg-quick down "${configPath}" || true`, () => resolve());
     });
 
-    // Bring interface up
     return new Promise((resolve, reject) => {
       exec(`sudo wg-quick up "${configPath}"`, (error, stdout, stderr) => {
         if (error) return reject(stderr || error.message);
@@ -92,20 +102,7 @@ ipcMain.handle("vpn-get-config-path", async (event, filename) => {
   return path.join(configDir, filename);
 });
 
-// -------------------- Get VPN interface IP --------------------
-ipcMain.handle("vpn-get-interface-ip", async (event, interfaceName) => {
-  return new Promise((resolve) => {
-    exec(
-      `ip -4 addr show ${interfaceName} | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'`,
-      (err, stdout) => {
-        if (err) return resolve("-");
-        resolve(stdout.trim() || "-");
-      }
-    );
-  });
-});
-
-// -------------------- Get public IP (server-side, safe) --------------------
+// -------------------- Get public IP --------------------
 ipcMain.handle("vpn-get-public-ip", async () => {
   return new Promise((resolve) => {
     https
@@ -125,19 +122,16 @@ ipcMain.handle("vpn-get-public-ip", async () => {
   });
 });
 
+// -------------------- Connection Status --------------------
 ipcMain.handle("getConnectionStatus", async () => {
   return new Promise((resolve) => {
     exec("ip link show | grep -E 'NeutronVPN'", (error, stdout) => {
-      if (error || !stdout.trim()) {
-        resolve(false); // No VPN interface found
-      } else {
-        // Optional: you could parse specific interface info if needed
-        resolve(true);
-      }
+      resolve(!error && stdout.trim() !== "");
     });
   });
 });
 
+// -------------------- Speed --------------------
 ipcMain.handle("vpn-get-speed", async () => {
   try {
     const iface = "NeutronVPN";
