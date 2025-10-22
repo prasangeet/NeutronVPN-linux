@@ -71,16 +71,30 @@ export default function DashboardPage() {
   const { downloadSpeed, uploadSpeed } = useVPNSpeed(isConnected);
 
   useEffect(() => {
-    // Check authentication
     const token = localStorage.getItem("auth_token");
     if (!token) {
       router.push("/login");
       return;
     }
 
+    const connectedServer = localStorage.getItem("connected_server");
     const name = localStorage.getItem("username") || "User";
+
     setUserName(name);
-    setSelectedServer(VPN_SERVERS[0]);
+
+    if (connectedServer) {
+      try {
+        const server = JSON.parse(connectedServer) as VPNServer;
+        console.log("Restoring connected server:", server);
+        setSelectedServer(server);
+      } catch (err) {
+        console.error("Failed to parse connected server:", err);
+        setSelectedServer(VPN_SERVERS[0]);
+      }
+    } else {
+      setSelectedServer(VPN_SERVERS[0]);
+    }
+
     setIsLoading(false);
   }, [router]);
 
@@ -116,6 +130,7 @@ export default function DashboardPage() {
 
       // 2️⃣ Connect WireGuard via Electron API
       await window.vpnAPI.connect(configPath);
+      localStorage.setItem("connected_server", JSON.stringify(selectedServer));
 
       setConnectionTime(0);
     } catch (err) {
@@ -141,6 +156,7 @@ export default function DashboardPage() {
 
       // Disconnect via Electron API
       await window.vpnAPI.disconnect(configPath);
+      localStorage.removeItem("connected_server");
 
       setConnectionTime(0);
     } catch (err) {

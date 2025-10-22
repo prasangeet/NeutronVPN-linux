@@ -21,7 +21,7 @@ function createWindow() {
   });
 
   // Load hosted frontend
-  mainWindow.loadURL("https://your-hosted-next-app.com");
+  mainWindow.loadURL("http://localhost:3000");
 
   mainWindow.on("closed", () => {
     mainWindow = null;
@@ -100,6 +100,20 @@ ipcMain.handle("vpn-save-config", async (event, filename, content) => {
 // Get config path
 ipcMain.handle("vpn-get-config-path", async (event, filename) => {
   return path.join(configDir, filename);
+});
+
+//get-interface-ip
+ipcMain.handle("vpn-get-interface-ip", async () => {
+  return new Promise((resolve) => {
+    exec(
+      "ip addr show NeutronVPN | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1",
+      (error, stdout) => {
+        if (error) return resolve("-");
+        const ip = stdout.trim();
+        resolve(ip || "-");
+      }
+    );
+  });
 });
 
 // -------------------- Get public IP --------------------

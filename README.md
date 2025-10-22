@@ -1,138 +1,172 @@
-# NeutronVPN
+# 🌐 NeutronVPN
 
-**NeutronVPN** is a secure, high-performance VPN solution that allows users to connect to private servers worldwide. It provides encrypted tunnels using WireGuard, dynamically manages clients, and displays real-time connection stats, IP addresses, and speed for seamless, protected internet access.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Django](https://img.shields.io/badge/Backend-Django-brightgreen) ![DRF](https://img.shields.io/badge/Backend-DRF-brightgreen) ![NextJS](https://img.shields.io/badge/Frontend-NextJS-blue) ![Electron](https://img.shields.io/badge/Frontend-Electron-blue) ![PostgreSQL](https://img.shields.io/badge/DB-PostgreSQL-blueviolet) ![WireGuard](https://img.shields.io/badge/VPN-WireGuard-lightblue)
 
----
+**NeutronVPN** is a secure, high-performance VPN solution built with WireGuard, a Django backend (with REST API), and an Electron + React client. It provides encrypted tunnels, dynamic client management, real-time stats, and remote server management via SSH.
 
-## Features
-
-- WireGuard-based VPN for fast and secure connections.
-- Dynamic client management with automatic IP assignment.
-- Real-time display of interface and public IP addresses.
-- Connection speed monitoring.
-- Cross-platform Electron + React client.
-- Server management via SSH for adding/removing peers.
+![NeutronVPN Icon](./frontend/electron/assets/icon.png)
 
 ---
 
-## Tech Stack
+## Table of Contents
 
-- **Backend:** Django + Django REST Framework
-- **Frontend:** React + Electron
-- **Database:** PostgreSQL
-- **VPN Protocol:** WireGuard
-- **Server Management:** SSH + Paramiko (Python)
+- 📌 [Features](#-features)
+- 🛠️ [Tech Stack](#-tech-stack)
+- 📁 [Folder Structure](#-folder-structure)
+- ⚡ [Quick Start](#-quick-start)
+- 📦 [Installation](#-installation)
+   - [PostgreSQL](#postgresql)
+   - [Backend](#backend)
+   - [Frontend (Electron + React)](#frontend-electron--react)
+   - [Docker (optional)](#docker-optional)
+- 🚀 [Usage](#-usage)
+- 🔧 [Configuration & Env](#-configuration--env)
+- 🖼️ [Screenshots / Demo](#-screenshots--demo)
+- 🧭 [Troubleshooting & FAQ](#-troubleshooting--faq)
+- 🤝 [Contributing](#-contributing)
+- 🛡️ [Security](#-security)
+- 📜 [License & Acknowledgements](#-license--acknowledgements)
 
 ---
 
-## Folder Structure
+## ✨ Features
+
+- 🔒 WireGuard-based VPN for fast and secure connections
+- ⚙️ Dynamic client management with automatic IP assignment
+- 📊 Real-time interface & public IP display, plus speed metrics
+- 🚀 Connection speed monitoring and health checks
+- 💻 Cross-platform Electron + React client with a modern UI
+- 🔐 SSH-based server management (Paramiko) for adding/removing peers
+- 🔁 Easy deployment options: local, Docker, or cloud droplets/EC2
+
+---
+
+## 🛠️ Tech Stack
+
+- Backend: Django + Django REST Framework
+- Frontend: React (Next.js) + Electron for desktop client
+- Database: PostgreSQL
+- VPN: WireGuard
+- Server Management: SSH (Paramiko)
+- CI / CD: (optional) GitHub Actions
+
+---
+
+## 📁 Folder Structure
 
 ```
-
-neutronvpn/
-├─ server/             # Server-side scripts
-│  ├─ start.sh         # Start WireGuard server
-│  ├─ stop.sh          # Stop WireGuard server
-├─ keys/               # WireGuard server & client keys
-├─ frontend/           # Electron + React frontend
-├─ backend/            # Django backend
-└─ README.md
-
-````
+.
+└── NeutronVPN-linux/
+    ├── backend
+    ├── frontend
+    ├── server (hosting files for DigitalOcean / AWS EC2)/
+    │   ├── keys
+    │   └── scripts/
+    │       ├── start.sh
+    │       └── stop.sh
+    ├── .gitignore
+    ├── install.sh
+    ├── start.sh
+    └── README.md
+```
 
 ---
 
-## Installation
+## ⚡ Quick Start (local development)
+
+1. Clone repo and start backend:
+    ```bash
+    git clone <repo-url>
+    cd NeutronVPN-linux/backend
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    cp .env.example .env
+    # configure .env, then
+    python manage.py migrate
+    python manage.py runserver
+    ```
+
+2. Start frontend (Electron):
+    ```bash
+    cd ../frontend
+    chmod +x ../../install.sh
+    ../../install.sh
+    ./start.sh
+    ```
+
+---
+
+## 📦 Installation
+
+### PostgreSQL
+
+Follow distribution-specific steps (Ubuntu / Fedora) — see original script blocks and ensure DB and user are created.
+
+(Refer to the existing README for full commands; keep credentials secure.)
 
 ### Backend
 
-1. Clone the repository:
-   ```bash
-   git clone <repo-url>
-   cd neutronvpn/backend
-    ```
-
-2. Install dependencies:
-
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
-3. Configure `.env` with your database and SSH credentials.
-4. Run migrations:
-
-   ```bash
-   python manage.py migrate
-   ```
-5. Start the server:
-
-   ```bash
-   python manage.py runserver
-   ```
+1. Create virtualenv, install requirements.
+2. Configure `.env` (DB, SSH, SERVER_INTERFACE_NAME).
+3. Run migrations and start server.
 
 ### Frontend (Electron + React)
 
-1. Navigate to frontend folder:
+1. Run install script in repo root:
+    ```bash
+    chmod +x ./install.sh
+    ./install.sh
+    ```
+2. Launch client:
+    ```bash
+    ./start.sh
+    ```
 
-   ```bash
-   cd ../frontend
-   ```
-2. Install dependencies:
+### Docker (optional)
 
-   ```bash
-   npm install
-   ```
-3. Start development:
+A Docker setup can simplify deployment. Example (add Dockerfiles / docker-compose):
 
-   ```bash
-   npm run dev
-   ```
+- Build containers for backend, frontend, and postgres.
+- Use docker-compose with environment variables and volumes.
 
----
-
-## Server Setup
-
-1. Copy `server` folder to your VPS.
-2. Generate server keys in `keys/` folder:
-
-   ```bash
-   wg genkey | tee keys/server_private.key | wg pubkey > keys/server_public.key
-   ```
-3. Start WireGuard server:
-
-   ```bash
-   ./server/start.sh
-   ```
-4. Stop WireGuard server:
-
-   ```bash
-   ./server/stop.sh
-   ```
+(Consider adding an official docker-compose.yaml in repo root.)
 
 ---
 
-## Usage
+## 🚀 Usage
 
-* Users can connect to available VPN servers via the Electron client.
+- Users connect to VPN servers via the Electron client.
+- Client displays:
+   - Interface IP (VPN)
+   - Public IP
+   - Connection speed
+   - Security status
+- Admins manage peers through Django REST API or server-side scripts (SSH).
 
-* The client shows:
+Example WireGuard client config snippet (generated by backend):
+```
+[Interface]
+PrivateKey = <client-private-key>
+Address = 10.6.0.2/32
+DNS = 1.1.1.1
 
-  * **Interface IP** (VPN)
-  * **Public IP**
-  * **Connection speed**
-  * **Security status**
-
-* Admins can add/remove clients remotely via the Django backend API.
+[Peer]
+PublicKey = <server-public-key>
+Endpoint = your-server:51820
+AllowedIPs = 0.0.0.0/0, ::/0
+```
 
 ---
 
-## Environment Variables
+## 🔧 Configuration & Env
 
-```env
+### Backend (.env)
+```
 DB_NAME=neutronvpn
 DB_USER=postgres
-DB_PASSWORD=ppd12345
+DB_PASSWORD=<pass>
 DB_HOST=localhost
 DB_PORT=5432
 
@@ -144,15 +178,76 @@ SSH_KEY="-----BEGIN OPENSSH PRIVATE KEY----- ... -----END OPENSSH PRIVATE KEY---
 SSH_KEY_PASSPHRASE=<hidden>
 ```
 
+### Frontend
+```
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api/
+```
+
+Keep secrets out of version control and rotate keys as needed.
+
 ---
 
-## License
+## 🖼️ Screenshots / Demo
 
-MIT License
+- Desktop client mockup:
+   - ![Client Screenshot](./frontend/electron/assets/screenshot.png) (add an actual screenshot)
+- Live demo GIF (optional): docs/demo.gif
 
-```
+Add screenshots or short GIFs to show connection flow, client UI, and speed graph.
 
-I can also generate a **shorter “Quick Start” README** optimized for GitHub if you want.  
+---
 
-Do you want me to do that next?
-```
+## 🧭 Troubleshooting & FAQ
+
+- Backend won’t start: check .env, DB connection, and migrations.
+- WireGuard errors: ensure kernel module is loaded and interface name matches SERVER_INTERFACE_NAME.
+- SSH remote commands failing: verify SSH_KEY and permissions; test with ssh -i path root@server.
+
+Common commands:
+- Check WireGuard status: sudo wg show
+- View logs: journalctl -u <service> --no-pager
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome — please:
+
+1. Fork the repo
+2. Create a feature branch
+3. Open a PR with description and tests/screenshots
+4. Respect code style and add changelog entry if appropriate
+
+See CONTRIBUTING.md and CODE_OF_CONDUCT.md (add these files if not present).
+
+---
+
+## 🛡️ Security
+
+Report vulnerabilities privately to the maintainers via the repository's security policy or email. Do not open public issues for security-sensitive information.
+
+---
+
+## 🔭 Roadmap
+
+Planned improvements:
+- Built-in auto-updates for Electron client
+- Mobile clients (iOS/Android)
+- Web dashboard for admin controls
+- Improved CI/CD and Docker images
+
+---
+
+## 📜 License & Acknowledgements
+
+MIT License — see LICENSE file.
+
+Thanks to the open source projects that power NeutronVPN: WireGuard, Django, Electron, Next.js, PostgreSQL.
+
+---
+
+If you'd like, I can:
+- Add a docker-compose example
+- Create CONTRIBUTING.md and CODE_OF_CONDUCT.md templates
+- Generate a release-ready systemd unit for the backend
+
